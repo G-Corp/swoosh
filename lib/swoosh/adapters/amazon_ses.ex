@@ -209,13 +209,16 @@ defmodule Swoosh.Adapters.AmazonSES do
 
   defp encrypt_value(secret, unencrypted_data), do: :crypto.hmac(:sha256, secret, unencrypted_data)
 
-  defp amz_date(dt), do: "#{dt.year}#{dt.month}#{dt.day}"
   defp amz_datetime(dt) do
-    time_string = Enum.map_join(
-      [dt.hour, dt.minute, dt.second],
+    "#{amz_date(dt)}T#{amz_time(dt)}Z"
+  end
+  defp amz_date(dt), do: "#{dt.year}#{amz_pad([dt.month, dt.day])}"
+  defp amz_time(dt), do: "#{amz_pad([dt.hour, dt.minute, dt.second])}"
+
+  defp amz_pad(list) do
+    Enum.map_join(
+      list,
       &String.pad_leading(to_string(&1), 2, "0")
     )
-
-    "#{amz_date(dt)}T#{time_string}Z"
   end
 end
